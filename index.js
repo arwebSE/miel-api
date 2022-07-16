@@ -28,13 +28,6 @@ console.log("Launching API in env mode:", process.env.NODE_ENV);
 
 /** ROUTES **/
 
-// Index page (to check status of API)
-app.get("/", (_req, res) => {
-    res.json({
-        data: { msg: `Index. DSN: ${db.getDSN()}`, status: "online" },
-    });
-});
-
 // Ping route for uptimerobot
 app.all("/ping", (_req, res) => {
     res.send("API is running!");
