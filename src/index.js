@@ -17,9 +17,9 @@ const geoUrl = process.env["GEO_URL"];
 app.use(express.json()); // parsing application/json
 app.use(express.urlencoded({ extended: true })); // parsing application/x-www-form-urlencoded
 let corsOptions = {
-    origin: ["https://studio.apollographql.com", "http://127.0.0.1", "http://localhost"],
-    methods: ["GET", "POST", "DELETE"],
-    credentials: true,
+    origin: ["*"],
+    methods: ["GET"],
+    credentials: false,
 };
 app.use(cors(corsOptions)); // cors
 
@@ -61,7 +61,7 @@ app.all("/weather", async (req, res) => {
     );
     const weather = await response.json();
     console.log("Got weather:", weather.current.weather[0].main);
-    res.json({ geo, weather });
+    res.json({ geo, ...weather });
 });
 
 /** ROUTES END **/
