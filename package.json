@@ -1,0 +1,17 @@
+{
+    "name": "me-api",
+    "version": "1.0.0",
+    "description": "API backend proxy server for miEl.",
+    "main": "index.js",
+    "scripts": {
+        "startz": "set NODE_ENV=development& node src/index.js",
+        "start": "set NODE_ENV=development& nodemon -L --delay 2 --watch src --exec node src/index.js",
+        "prod": "set NODE_ENV=production& node src/index.js",
+        "test": "set NODE_ENV=test& nyc --reporter=html mocha 'test/**/*.js' --exit --timeout 10000"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^14.3.2",
+        "express": "^4.17.2"
+    }
+}
