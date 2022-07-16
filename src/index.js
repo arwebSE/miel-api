@@ -7,6 +7,11 @@ const app = require("express")();
 const httpServer = require("http").Server(app);
 const port = process.env.PORT;
 const cors = require("cors");
+const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
+
+const apiKey = process.env["API_KEY"];
+const apiUrl = process.env["API_URL"];
+const geoUrl = process.env["GEO_URL"];
 
 // Server setup
 app.use(express.json()); // parsing application/json
@@ -24,7 +29,7 @@ console.log("Launching API in env mode:", process.env.NODE_ENV);
 /** ROUTES **/
 
 // Index page (to check status of API)
-app.get("/", function (_req, res) {
+app.get("/", (_req, res) => {
     res.json({
         data: { msg: `Index. DSN: ${db.getDSN()}`, status: "online" },
     });
@@ -33,6 +38,30 @@ app.get("/", function (_req, res) {
 // Ping route for uptimerobot
 app.all("/ping", (_req, res) => {
     res.send("API is running!");
+});
+
+const getGeoData = async (city) => {
+    const geoResponse = await fetch(`${geoUrl}?q=${city}&appid=${apiKey}&limit=1`);
+    const geoResult = await geoResponse.json();
+    const data = {
+        lat: geoResult[0].lat,
+        lon: geoResult[0].lon,
+        name: `${geoResult[0].name}, ${geoResult[0].country}`,
+    };
+    console.log("Got geo", data);
+    return data;
+};
+
+// Get weather
+app.all("/weather", async (req, res) => {
+    const geo = await getGeoData(req.query.q);
+    const exclude = "hourly,minutely,alerts";
+    const response = await fetch(
+        `${apiUrl}?lat=${geo.lat}&lon=${geo.lon}&appid=${apiKey}&exclude=${exclude}&units=metric`
+    );
+    const weather = await response.json();
+    console.log("Got weather:", weather.current.weather[0].main);
+    res.json({ geo, weather });
 });
 
 /** ROUTES END **/
