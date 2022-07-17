@@ -6,7 +6,6 @@ const express = require("express");
 const app = require("express")();
 const httpServer = require("http").Server(app);
 const port = process.env.PORT;
-const cors = require("cors");
 const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const apiKey = process.env["API_KEY"];
@@ -16,12 +15,14 @@ const geoUrl = process.env["GEO_URL"];
 // Server setup
 app.use(express.json()); // parsing application/json
 app.use(express.urlencoded({ extended: true })); // parsing application/x-www-form-urlencoded
-let corsOptions = {
-    origin: ["*"],
-    methods: ["GET"],
-    credentials: false,
-};
-app.use(cors(corsOptions)); // cors
+
+// cors
+app.use((req, res, next) => {
+  res.append('Access-Control-Allow-Origin', '*');
+  res.append('Access-Control-Allow-Headers', 'Content-Type');
+  res.set('Access-Control-Expose-Headers', '*')
+  next();
+})
 
 // Env mode check
 console.log("Launching API in env mode:", process.env.NODE_ENV);

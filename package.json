@@ -5,14 +5,15 @@
     "main": "index.js",
     "scripts": {
         "start": "set NODE_ENV=development& node index.js",
-        "watch": "set NODE_ENV=development& nodemon -L --delay 2 --watch src --exec node index.js",
+        "watch": "set NODE_ENV=development& nodemon -L --delay 2 --watch ./ --exec node index.js",
         "prod": "set NODE_ENV=production& node index.js",
         "test": "set NODE_ENV=test& nyc --reporter=html mocha 'test/**/*.js' --exit --timeout 10000"
     },
     "dependencies": {
-        "cors": "^2.8.5",
-        "dotenv": "^14.3.2",
         "express": "^4.17.2",
         "node-fetch": "^3.2.8"
+    },
+    "devDependencies": {
+        "dotenv": "^14.3.2"
     }
 }
