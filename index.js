@@ -57,7 +57,7 @@ app.all("/weather", async (req, res) => {
         const geo = await getGeoData(req.query.q);
         const exclude = "hourly,minutely,alerts";
         let units = "metric";
-        if (freedom) units = "imperial";
+        if (req.query.freedom === "true") units = "imperial";
         const response = await fetch(
             `${apiUrl}?lat=${geo.lat}&lon=${geo.lon}&appid=${apiKey}&exclude=${exclude}&units=${units}`
         );
