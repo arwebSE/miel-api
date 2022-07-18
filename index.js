@@ -12,20 +12,25 @@ const apiKey = process.env["API_KEY"];
 const apiUrl = process.env["API_URL"];
 const geoUrl = process.env["GEO_URL"];
 
+const timeConsole = (...args) => {
+    const d = new Date();
+    console.log(`[${d.toLocaleTimeString()}]`, ...args);
+};
+
 // Server setup
 app.use(express.json()); // parsing application/json
 app.use(express.urlencoded({ extended: true })); // parsing application/x-www-form-urlencoded
 
 // cors
 app.use((req, res, next) => {
-  res.append('Access-Control-Allow-Origin', '*');
-  res.append('Access-Control-Allow-Headers', 'Content-Type');
-  res.set('Access-Control-Expose-Headers', '*')
-  next();
-})
+    res.append("Access-Control-Allow-Origin", "*");
+    res.append("Access-Control-Allow-Headers", "Content-Type");
+    res.set("Access-Control-Expose-Headers", "*");
+    next();
+});
 
 // Env mode check
-console.log("Launching API in env mode:", process.env.NODE_ENV);
+timeConsole("Launching API in env mode:", process.env.NODE_ENV);
 
 /** ROUTES **/
 
@@ -42,20 +47,22 @@ const getGeoData = async (city) => {
         lon: geoResult[0].lon,
         name: `${geoResult[0].name}, ${geoResult[0].country}`,
     };
-    console.log("Got geo", data);
+    timeConsole("Got geo", data);
     return data;
 };
 
 // Get weather
 app.all("/weather", async (req, res) => {
-    const geo = await getGeoData(req.query.q);
-    const exclude = "hourly,minutely,alerts";
-    const response = await fetch(
-        `${apiUrl}?lat=${geo.lat}&lon=${geo.lon}&appid=${apiKey}&exclude=${exclude}&units=metric`
-    );
-    const weather = await response.json();
-    console.log("Got weather:", weather.current.weather[0].main);
-    res.json({ geo, ...weather });
+    if (req.query.verify === "b2d100b565620e1b1765") {
+        const geo = await getGeoData(req.query.q);
+        const exclude = "hourly,minutely,alerts";
+        const response = await fetch(
+            `${apiUrl}?lat=${geo.lat}&lon=${geo.lon}&appid=${apiKey}&exclude=${exclude}&units=metric`
+        );
+        const weather = await response.json();
+        timeConsole("Got weather:", weather.current.weather[0].main);
+        res.json({ geo, ...weather });
+    } else res.send("Unauthorized.");
 });
 
 /** ROUTES END **/
@@ -79,10 +86,10 @@ app.listen(async () => {
 
     const bootup = new Promise((resolve) => httpServer.listen({ port }, resolve));
     await bootup
-        .then(console.log(`🚀 API launched at http://localhost:${port}`))
+        .then(timeConsole(`🚀 API launched at http://localhost:${port}`))
         .then(app.emit("booted"))
-        .catch((err) => console.log("Error booting up!", err));
-    console.log(`🌠 [${date.toISOString().slice(0, -5)}]`);
+        .catch((err) => timeConsole("Error booting up!", err));
+    timeConsole(`🌠 [${date.toISOString().slice(0, -5)}]`);
 });
 
 module.exports = { app, httpServer };
