@@ -53,7 +53,8 @@ const getGeoData = async (city) => {
 
 // Get weather
 app.all("/weather", async (req, res) => {
-    if (req.query.verify === "b2d100b565620e1b1765") {
+    timeConsole("Got incoming call with:", req.query.verify);
+    if (req.query.verify === process.env["VERIFY"]) {
         const geo = await getGeoData(req.query.q);
         const exclude = "hourly,minutely,alerts";
         let units = "metric";
