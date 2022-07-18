@@ -56,8 +56,10 @@ app.all("/weather", async (req, res) => {
     if (req.query.verify === "b2d100b565620e1b1765") {
         const geo = await getGeoData(req.query.q);
         const exclude = "hourly,minutely,alerts";
+        let units = "metric";
+        if (freedom) units = "imperial";
         const response = await fetch(
-            `${apiUrl}?lat=${geo.lat}&lon=${geo.lon}&appid=${apiKey}&exclude=${exclude}&units=metric`
+            `${apiUrl}?lat=${geo.lat}&lon=${geo.lon}&appid=${apiKey}&exclude=${exclude}&units=${units}`
         );
         const weather = await response.json();
         timeConsole("Got weather:", weather.current.weather[0].main);
