@@ -46,7 +46,7 @@ const cacheMW = (duration) => {
             res.sendResponse = res.send;
             res.send = (body) => {
                 timeConsole("Storing response in cache...");
-                nCache.set(key, body, duration * 1000);
+                nCache.set(key, body, duration);
                 res.sendResponse(body);
             }
             next();
@@ -75,7 +75,7 @@ const getGeoData = async (city) => {
 };
 
 // Get weather, caches for 10min
-app.all("/weather", cacheMW(10 * 60), async (req, res) => {
+app.all("/weather", cacheMW(60 * 10), async (req, res) => {
     timeConsole("Got incoming call with:", req.query.verify);
     if (req.query.verify === process.env["VERIFY"]) {
         const geo = await getGeoData(req.query.q);
