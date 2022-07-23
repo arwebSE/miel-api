@@ -4,6 +4,8 @@ require("dotenv").config();
 // Essential deps & config
 const express = require("express");
 const app = require("express")();
+const NodeCache = require("node-cache");
+const nCache = new NodeCache();
 const httpServer = require("http").Server(app);
 const port = process.env.PORT;
 const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
@@ -32,6 +34,27 @@ app.use((req, res, next) => {
 // Env mode check
 timeConsole("Launching API in env mode:", process.env.NODE_ENV);
 
+const cacheMW = (duration) => {
+    return (req, res, next) => {
+        let key = "__express__" + req.originalUrl || req.url;
+        let cachedBody = nCache.get(key);
+        if (cachedBody) {
+            timeConsole("Query already fetched, sending cache...");
+            res.send(cachedBody);
+            return;
+        } else {
+            res.sendResponse = res.send;
+            res.send = (body) => {
+                timeConsole("Storing response in cache...");
+                nCache.set(key, body, duration * 1000);
+                res.sendResponse(body);
+            }
+            next();
+        }
+    }
+};
+
+
 /** ROUTES **/
 
 // Ping route for uptimerobot
@@ -51,8 +74,8 @@ const getGeoData = async (city) => {
     return data;
 };
 
-// Get weather
-app.all("/weather", async (req, res) => {
+// Get weather, caches for 10min
+app.all("/weather", cacheMW(10 * 60), async (req, res) => {
     timeConsole("Got incoming call with:", req.query.verify);
     if (req.query.verify === process.env["VERIFY"]) {
         const geo = await getGeoData(req.query.q);
