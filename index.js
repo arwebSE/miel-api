@@ -62,6 +62,14 @@ app.all("/ping", (_req, res) => {
     res.send("API is running!");
 });
 
+app.all("/set", (req, res) => {
+    res.send(`set key "${req.query.key}" to value "${req.query.value}"`);
+});
+
+app.all("/get", (req, res) => {
+    res.send(`getting key "${req.query.key}" (not actually gettinganything cuz i dont orka spara saker)`);
+});
+
 const getGeoData = async (city) => {
     const geoResponse = await fetch(`${geoUrl}?q=${city}&appid=${apiKey}&limit=1`);
     const geoResult = await geoResponse.json();
