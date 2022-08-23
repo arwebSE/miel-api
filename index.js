@@ -9,14 +9,22 @@ const nCache = new NodeCache();
 const httpServer = require("http").Server(app);
 const port = process.env.PORT;
 const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
+const fs = require("fs");
 
 const apiKey = process.env["API_KEY"];
 const apiUrl = process.env["API_URL"];
 const geoUrl = process.env["GEO_URL"];
 
+let logDate = new Date();
+logDate = logDate.toLocaleDateString();
+logDate = logDate.replaceAll("/", "");
+
+const log = fs.createWriteStream(`${__dirname}/logs/${logDate}.log`, { flags: "w" });
+
 const timeConsole = (...args) => {
     const d = new Date();
     console.log(`[${d.toLocaleTimeString()}]`, ...args);
+    log.write(`[${d.toLocaleTimeString()}] ${args}\n`);
 };
 
 // Server setup
@@ -36,7 +44,9 @@ timeConsole("Launching API in env mode:", process.env.NODE_ENV);
 
 const cacheMW = (duration) => {
     return (req, res, next) => {
-        let key = "__express__" + req.originalUrl || req.url;
+        const oUrl = req.originalUrl.split('&id')[0];
+        const rUrl = req.url.split('&id')[0];
+        let key = "__express__" + oUrl || rUrl;
         let cachedBody = nCache.get(key);
         if (cachedBody) {
             timeConsole("Query already fetched, sending cache...");
@@ -54,20 +64,11 @@ const cacheMW = (duration) => {
     }
 };
 
-
 /** ROUTES **/
 
 // Ping route for uptimerobot
 app.all("/ping", (_req, res) => {
     res.send("API is running!");
-});
-
-app.all("/set", (req, res) => {
-    res.send(`set key "${req.query.key}" to value "${req.query.value}"`);
-});
-
-app.all("/get", (req, res) => {
-    res.send(`getting key "${req.query.key}" (not actually gettinganything cuz i dont orka spara saker)`);
 });
 
 const getGeoData = async (city) => {
@@ -84,8 +85,8 @@ const getGeoData = async (city) => {
 
 // Get weather, caches for 10min
 app.all("/weather", cacheMW(60 * 10), async (req, res) => {
-    timeConsole("Got incoming call with:", req.query.verify);
     if (req.query.verify === process.env["VERIFY"]) {
+        timeConsole("Got incoming call from:", req.query.id);
         const geo = await getGeoData(req.query.q);
         const exclude = "hourly,minutely,alerts";
         let units = "metric";
