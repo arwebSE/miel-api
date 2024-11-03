@@ -1,20 +1,22 @@
 {
-    "name": "me-api",
-    "version": "1.1.0",
-    "description": "API backend proxy server for miEl.",
+    "name": "miel-api",
+    "version": "1.2.0",
+    "description": "Serverless API for weather and geolocation on Vercel.",
     "main": "index.js",
     "scripts": {
-        "start": "set NODE_ENV=development& node index.js",
-        "watch": "set NODE_ENV=development& nodemon -L --delay 2 --watch ./ --exec node index.js",
-        "prod": "set NODE_ENV=production& node index.js",
-        "test": "set NODE_ENV=test& nyc --reporter=html mocha 'test/**/*.js' --exit --timeout 10000"
+      "dev": "vercel dev",
+      "test": "NODE_ENV=test nyc --reporter=html mocha 'test/**/*.js' --exit --timeout 10000"
     },
     "dependencies": {
-        "express": "^4.17.2",
-        "node-cache": "^5.1.2",
-        "node-fetch": "^3.2.8"
+      "node-cache": "^5.1.2",
+      "node-fetch": "^3.2.8"
     },
     "devDependencies": {
-        "dotenv": "^14.3.2"
+      "nyc": "^15.1.0",
+      "mocha": "^9.1.3"
+    },
+    "engines": {
+      "node": ">=14"
     }
-}
+  }
+  
